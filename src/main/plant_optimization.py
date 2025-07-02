@@ -218,6 +218,30 @@ def get_generator_profile(generator, cutout, layout, hexagons, freq):
                             shapes = hexagons,
                             per_unit = True).resample(time=freq).mean()
         profile = profile.rename(dict(dim_0='hexagon'))
+    elif generator == "biomass":
+        # Biomass: dispatchable with high capacity factor for backup/flexibility
+        num_hexagons = len(hexagons)
+        num_time_steps = len(cutout.coords['time'])
+        
+        # Create constant capacity factor profile (90% for biomass availability)
+        profile = xr.DataArray(
+            data=0.9 * np.ones((num_hexagons, num_time_steps)),
+            dims=['hexagon', 'time'],
+            coords={'hexagon': np.arange(num_hexagons), 
+                    'time': cutout.coords['time']}
+        ).resample(time=freq).mean()
+    elif generator == "geothermal":
+        # Geothermal: baseload with very high capacity factor
+        num_hexagons = len(hexagons)
+        num_time_steps = len(cutout.coords['time'])
+        
+        # Create constant capacity factor profile (95% for geothermal baseload)
+        profile = xr.DataArray(
+            data=0.95 * np.ones((num_hexagons, num_time_steps)),
+            dims=['hexagon', 'time'],
+            coords={'hexagon': np.arange(num_hexagons), 
+                    'time': cutout.coords['time']}
+        ).resample(time=freq).mean()
     
     return profile
 
@@ -539,6 +563,14 @@ if __name__ == "__main__":
                 ##### elif added newly for hydro, need to double check the column name
                 elif gen == "hydro":
                     max_capacity = hexagons.loc[i,'hydro']*gen_capacity
+                elif gen == "biomass":
+                    # Constant biomass capacity across all hexagons for backup/flexibility
+                    # Capacity per hexagon is determined by gen_capacity from config file
+                    max_capacity = gen_capacity
+                elif gen == "geothermal":
+                    # Constant geothermal capacity across all hexagons for baseload
+                    # Capacity per hexagon is determined by gen_capacity from config file  
+                    max_capacity = gen_capacity
                 # -- Eventually move loops to something like this so we don't have ifs - max_capacity = hexagons.loc[i, gen] * SNAKEMAKE_CONFIG_GEN_SIZE
                 
                 generators[gen].append(potential)

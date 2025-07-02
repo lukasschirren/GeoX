@@ -16,13 +16,18 @@ freq: '1H'
 # Generators:
 # Modify 'generators_dict' to hold the generators you would like to use
 # Make sure it is in the same style as below
-generators_dict: {'solar' : [], 'wind' : [], 'hydro' : []}
+generators_dict: {'solar' : [], 'wind' : [], 'hydro' : [], 'biomass' : [], 'geothermal' : []}
 panel: 'CSi'
 turbine: 'NREL_ReferenceTurbine_2020ATB_4MW'
+# Generator capacities:
+# For solar, wind, hydro: multiplied by spatial potential data per hexagon
+# For biomass, geothermal: constant capacity per hexagon (backup/flexibility)
 gen_capacity:
-    solar: 1
-    wind: 4
-    hydro: 1
+    solar: 1       # MW per unit of solar potential from spatial data
+    wind: 4        # MW per turbine (based on turbine specifications)
+    hydro: 1       # MW per unit of hydro potential from spatial data
+    biomass: 100   # MW constant capacity per hexagon for backup/flexibility
+    geothermal: 50 # MW constant capacity per hexagon for baseload
 
 # Other:
 solver : 'gurobi'
